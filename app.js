@@ -1,191 +1,304 @@
-fetch('./wordlist.json')
-  .then(res => res.json())
-  .then( data => {
-
-    const wordlist = data.words;
+fetch("./wordlist.json")
+  .then((res) => res.json())
+  .then((data) => {
+    const wordList = data.words;
     const starters = data.starters;
 
-    // console.log(wordlist);
-    // console.log(starters);
+    const answerHint = document.querySelector(".answerHint");
+    const letterBox = document.querySelector(".letterBox");
+    const answerBox = document.querySelector(".answerBox");
+    const wordBox = document.querySelector(".wordBox");
+    const timerLabel = document.querySelector(".timer");
+    const scoreLabel = document.querySelector(".score");
+    const stopBtn = document.querySelector(".stopBtn");
+    const closeHelpBtn = document.querySelector(".closeHelpBtn");
+    const helpDialog = document.querySelector(".help");
+    const helpBtn = document.querySelector(".helpBtn");
 
-    const letterbox = document.querySelector('.letterbox');
-    const answerbox = document.querySelector('.answerbox');
-    const words = document.querySelector('.words');
-    const scoreLabel = document.querySelector('.score');
-    const startBtn = document.querySelector('.start-btn');
-    const endBtn = document.querySelector('.end-btn');
-    const playBox = document.querySelector('.play');
-    const pauseBox = document.querySelector('.pause');
-
-    const finalScore = document.querySelector('.final-score');
-    const finalLetters = document.querySelector('.final-letters');
-    const finalWords = document.querySelector('.final-words');
-    
     var letters;
-    var answers;
-    
-    var foundSolutions;
-    var solutions;
-    
-    var score;
-    
-    // console.log(starters.length)
+    var answer;
+    var words;
 
-    startBtn.addEventListener('click', startGame);
-    endBtn.addEventListener('click', endGame);
-    
-    // init()
+    var score = 0;
+    var timerInterval;
+    var timeLength = 300;
+    var timerCount = 0;
+    var gameStarted = false;
 
-    function findSolutions(starter) {
-      return wordlist.filter((w) => {
-        if (w.length < 3) return false;
+    init();
 
-        let arrayW = w.split('');
-        let arrayStarter = starter.split('');
+    function updateBox(content, className, box) {
+      content.forEach((element) =>
+        box.appendChild(createDiv(element, className))
+      );
+    }
 
-        while (arrayW.length > 0) {
-          let a = arrayW.pop();
+    function updateScore(word) {
+      let wordScore = Math.floor(word.length ** 1.8) + (word.length ? 1 : 0);
+      score += wordScore;
+      scoreLabel.innerHTML = `SCORE: ${score}`;
+    }
 
-          if (!arrayStarter.includes(a)) {
-            return false;
-          }
+    function init() {
+      updateScore("");
 
-          arrayStarter.splice(arrayStarter.findIndex(k => k === a), 1);
-        }
+      // Initialize boxes
+      updateBox("find the".split(""), "letter", letterBox);
+      updateBox("anagrams".split(""), "letter", answerBox);
+      updateBox(Array(100).fill("XXXX"), "word reveal", wordBox);
 
-        return true;
+      stopBtn.innerHTML = "START";
+
+      stopBtn.addEventListener("click", () => {
+        gameStarted ? stopGame() : startGame();
+      });
+
+      setTime(timeLength);
+
+      // initialize help dialog
+      closeHelpBtn.addEventListener("click", () => {
+        helpDialog.classList.add("nohelp");
+      });
+
+      helpBtn.addEventListener("click", () => {
+        helpDialog.classList.remove("nohelp");
+      });
+
+      helpDialog.addEventListener("click", (e) => {
+        if (e.target === helpDialog) helpDialog.classList.add("nohelp");
       });
     }
 
-    // console.log(findSolutions('beatniks'));
+    // Create new div text element with certain class
+    function createDiv(content, className) {
+      let newElement = document.createElement("div");
 
-    function randomStarter() {
-      return starters[Math.floor(Math.random() * starters.length)];
+      newElement.className =
+        content === " " ? "empty" : content === "'" ? "comma" : className;
+      newElement.innerText = content;
+
+      return newElement;
     }
-    
-    function checkLetters() {
-      var s = answers.join('');
-      if (solutions.includes(s) && !foundSolutions.includes(s)) {
-        score += Math.floor((s.length**2)/4) + s.length;
-        foundSolutions.push(s);
-    
-        addChild(words, 'word', s);
-    
-        while (answers.length > 0) {
-          let letter = answers.pop()[0];
-    
-          addChild(letterbox, 'letter', letter);
-          answerbox.removeChild(answerbox.lastChild);
-    
-          letters.push(letter);
-        }
-    
-        updateScore(score);
-      }
+
+    // Format time correctly
+    function setTime(t) {
+      let timeString = `${Math.floor(t / 60)}:${("00" + (t % 60)).slice(-2)}`;
+      timerLabel.innerHTML = timeString;
     }
-    
-    function addChild(parent, className, text) {
-      let newElement = document.createElement('div');
-      newElement.className = className;
-      newElement.innerHTML = text;
-      parent.appendChild(newElement);
-    }
-    
-    function shuffleLetters() {
-      for (let i = letters.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [letters[i], letters[j]] = [letters[j], letters[i]];
-      }
-      
-      clearParent(letterbox);
-      resetLetterBox(letterbox);
-    }
-    
-    function resetLetterBox(parent) {
-      for (let i = 0; i < letters.length; i++) {
-    
-        addChild(parent, 'letter', letters[i]);
-      }
-    }
-    
-    function init() {
+
+    function startGame() {
+      gameStarted = true;
+
       score = 0;
 
-      let word = randomStarter();
-      
-      letters = word.split('');
-      answers = [];
+      letters = initialLetters().split("");
+      answer = [];
+      words = initialWords().map((w) => ({
+        word: w,
+        isFound: false,
+      }));
 
-      solutions = findSolutions(word);
-      foundSolutions = [];
+      // clear Children
+      clearChildren(letterBox);
+      clearChildren(answerBox);
+      clearChildren(wordBox);
 
-      resetLetterBox(letterbox);
-      updateScore(0);
-      shuffleLetters();
-      clearParent(answerbox);
-      window.addEventListener('keydown', letterChange);
+      // Initialize letters, answer, word boxes
+      updateBox(letters, "letter", letterBox);
+      updateBox(answer, "letter", answerBox);
+
+      updateScore("");
+
+      words.forEach((word) => {
+        wordBox.appendChild(
+          createDiv(
+            word.isFound
+              ? word.word
+              : Array(word.word.length).fill("-").join(""),
+            "word"
+          )
+        );
+      });
+
+      scrambleLetters();
+
+      timerCount = 0;
+      setTime(timeLength);
+
+      clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        timerCount += 1;
+        setTime(timeLength - timerCount);
+        if (timerCount === timeLength) stopGame();
+      }, 1000);
+
+      document.addEventListener("keydown", handleKey);
+
+      stopBtn.innerHTML = "END";
     }
 
-    function startGame(e) {
-      playBox.classList.remove('nodisplay');
-      pauseBox.classList.add('nodisplay');
-      
-      init();
+    // Stop game
+    function stopGame() {
+      gameStarted = false;
+      clearInterval(timerInterval);
+      document.removeEventListener("keydown", handleKey);
 
+      words.forEach((word, wordIndex) => {
+        if (!word.isFound) {
+          wordBox.childNodes[wordIndex].innerHTML = word.word;
+          wordBox.childNodes[wordIndex].classList.add("reveal");
+        }
+      });
+
+      clearChildren(letterBox);
+      updateBox("time's".split(""), "letter", letterBox);
+
+      clearChildren(answerBox);
+      updateBox("up".split(""), "letter", answerBox);
+
+      stopBtn.innerHTML = "START";
     }
-    
-    function endGame(e) {
-      playBox.classList.add('nodisplay');
-      pauseBox.classList.remove('nodisplay');
-      window.removeEventListener('keydown');
-      
-      finalScore.innerHTML = score;
 
-      clearParent(finalLetters);
-      resetLetterBox(finalLetters);
-
-      clearParent(finalWords);
-
+    // Clear element of children
+    function clearChildren(parent) {
+      while (parent.firstChild) parent.removeChild(parent.lastChild);
     }
 
-    function clearParent(parent) {
-      while(parent.firstChild) {
-        parent.firstChild.remove();
-      }
+    // Pick starter at random
+    function initialLetters() {
+      return starters[Math.floor(Math.random() * starters.length)];
     }
-    
-    function updateScore(s) {
-      scoreLabel.innerHTML = s;
+
+    // Pick corresponding words from wordlist
+    function initialWords() {
+      return wordList
+        .filter((word) => word.length > 2 && compareWord(word))
+        .sort((a, b) => a > b || a.length > b.length);
     }
-    
-    function letterChange(e) {
-      var k = e.key;
-    
-      if (k === 'Backspace') {
-        let letter = answers.pop()[0];
-    
-        addChild(letterbox, 'letter', letter);
-        answerbox.removeChild(answerbox.lastChild);
-    
-        letters.push(letter);
-      } else if (k === ' ') {
-        shuffleLetters();
-      } else {
-        var i = letters.findIndex((c) => k === c);
-    
-        if (i !== -1) {
-          let letter = letters.splice(i, 1);
-    
-          addChild(answerbox, 'letter', letter);
-          letterbox.removeChild(letterbox.children[i]);
-    
-          answers.push(letter);
-          checkLetters();
+
+    // Compare word to letters
+    function compareWord(word) {
+      let tempLetters = [...letters];
+      let wordArray = word.split("");
+
+      for (let i = 0; i < wordArray.length; i++) {
+        let letterIndex = tempLetters.findIndex((l) => l === wordArray[i]);
+
+        if (letterIndex >= 0) {
+          tempLetters.splice(letterIndex, 1);
+        } else {
+          return false;
         }
       }
-    
-    }
-  }
-    
 
-  );
+      return true;
+    }
+
+    // Handle Alphabetic keys(65-90), Space bar(32), Escape(27), Backspace(8)
+    function handleKey(e) {
+      // console.log(e);
+      if (e.keyCode >= 65 && e.keyCode <= 90) {
+        // Handle Alphabet keys
+        let key = e.key.toLowerCase();
+
+        let letterIndex = letters.findIndex((e) => e === key);
+
+        // If letter in letters array, index found is >= 0, else -1
+        if (letterIndex >= 0) {
+          // Update arrays
+          let foundLetter = letters.splice(letterIndex, 1);
+          answer = [...answer, foundLetter[0]];
+
+          // Update Boxes
+          let removedLetter = letterBox.removeChild(
+            letterBox.childNodes[letterIndex]
+          );
+          answerBox.appendChild(removedLetter);
+
+          checkAnswer();
+        }
+      } else if (e.keyCode === 8 && answerBox.hasChildNodes()) {
+        // Handle Backspace, remove from answer into letter
+        letters = [...letters, answer.pop()];
+
+        let removedLetter = answerBox.removeChild(answerBox.lastChild);
+        letterBox.appendChild(removedLetter);
+      } else if (e.keyCode === 32) {
+        // Scramble letters
+        scrambleLetters();
+      } else if (e.keyCode === 27) {
+        // Clear Boxes
+        resetBoxes();
+      }
+    }
+
+    // Check answer
+    function checkAnswer() {
+      let word = answer.join("");
+
+      words.forEach((w, wordIndex) => {
+        if (w.word === word && !w.isFound) {
+          // Create a div with the found word, appearing shortly
+          // Move the created div to the position of the word in the wordlist
+          // Animate both the fontsize change and the opacity
+          // Div should be blue in color
+
+          var initialRect = answerHint.getBoundingClientRect();
+          var foundWord = createDiv(w.word, "foundWord");
+          foundWord.style.left = answerBox.firstChild.offsetLeft + "px";
+          foundWord.style.top = answerBox.firstChild.offsetTop + "px";
+          answerHint.appendChild(foundWord);
+
+          var finalRect = wordBox.childNodes[wordIndex].getBoundingClientRect();
+
+          foundWord.style.left = finalRect.left - initialRect.left + "px";
+          foundWord.style.top = finalRect.top - initialRect.top + "px";
+
+          foundWord.style.fontSize = "0.75rem";
+          foundWord.style.letterSpacing = 0;
+          foundWord.style.opacity = 0;
+
+          setTimeout(() => {
+            foundWord.remove();
+          }, 1000);
+
+          updateScore(w.word);
+
+          resetBoxes();
+          w.isFound = true;
+
+          wordBox.childNodes[wordIndex].innerHTML = w.word;
+          return;
+        }
+      });
+    }
+
+    // Scramble letters array
+    function scrambleLetters() {
+      letters = shuffleArray(letters);
+
+      letters.forEach((letter, letterIndex) => {
+        letterBox.childNodes[letterIndex].innerHTML = letter;
+      });
+    }
+
+    // Function to return shuffled array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i >= 0; i--) {
+        const j = Math.floor(Math.random() * i + 1);
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+
+      return array;
+    }
+
+    function resetBoxes() {
+      letters = [...letters, ...answer];
+      answer = [];
+
+      while (answerBox.hasChildNodes()) {
+        letterBox.appendChild(answerBox.firstChild);
+      }
+    }
+  });

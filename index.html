@@ -1,31 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="app.js" defer></script>
-  <title>Anagramata</title>
-</head>
-<body>
-  <div class="container">
-    <div class="box title">Anagramata</div>
-    <div class="play nodisplay">
-      <div class="box timer-score">
-        <div class="score-label">SCORE: <span class="score"></span></div>
-        <div class="end-btn btn">END</div>
-        <div class="timer">4:00</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+    <title>Anagramata</title>
+    <link
+      rel="shortcut icon"
+      href="./favicon/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="manifest" href="./favicon/site.webmanifest" />
+  </head>
+  <body>
+    <div class="help nohelp">
+      <h2>ABOUT</h2>
+      <div class="about-text">
+        <p>
+          Find as many anagrams as possible by typing the letters in the
+          letterbox to form words.
+        </p>
+        <p>Aim for the highest score.</p>
+        <h3>KEYBOARD SHORTCUTS</h3>
+        <p>
+          <em><strong>SPACE BAR</strong></em> - Shuffle Letters
+        </p>
+        <p>
+          <em><strong>ESCAPE KEY</strong></em> - Clear guess
+        </p>
+        <p>
+          <em><strong>BACKSPACE</strong></em> - Remove last guess
+        </p>
       </div>
-      <div class="box letterbox"></div>
-      <div class="box answerbox"></div>
-      <div class="box words"></div>
+      <div class="btn closeHelpBtn">CLOSE</div>
     </div>
-    <div class="pause">
-      <div class="start-btn btn">START</div>
-      <div class="final-score final"></div>
-      <div class="final-letters final"></div>
-      <div class="final-words final"></div>
+    <div class="container">
+      <div class="btn helpBtn">?</div>
+      <h1 id="title">Anagramata</h1>
+      <div class="scoreTimer">
+        <div class="timer"></div>
+        <div class="btn stopBtn">STOP</div>
+        <div class="score">0</div>
+      </div>
+      <div class="hint-box">
+        LETTERS
+        <div class="box letterBox"></div>
+      </div>
+      <div class="hint-box answerHint">
+        GUESS
+        <div class="box answerBox"></div>
+      </div>
+      <div class="guide-box">
+        <span>
+          <em><strong>SPACE BAR</strong></em> - Shuffle Letters
+        </span>
+        <span>
+          <em><strong>ESCAPE KEY</strong></em> - Clear guess
+        </span>
+        <span>
+          <em><strong>BACKSPACE</strong></em> - Remove last guess
+        </span>
+      </div>
+      <div class="wordBox"></div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

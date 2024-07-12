@@ -1,144 +1,234 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap"); */
-@import url("https://fonts.googleapis.com/css2?family=Langar&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@200;400;700;900&display=swap");
 
-html, body {
-  height: 100%;
-  width: 100%;
-  margin: auto;
-  color: white;
+:root {
+  --wordTimeout: 400ms;
+  --wordAnimateCurve: ease-in;
+  /* --wordAnimateCurve: cubic-bezier(0.96, 0.21, 0.97, 0.63); */
+}
+
+* {
+  font-family: "Raleway", sans-serif;
 }
 
 body {
-  background-color: orangered;
-
+  margin: 0 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: 100%;
 }
 
-.container {
-  margin: auto;
-  width: 600px;
-  min-width: 600px;
+/* HELP */
+.help {
+  position: absolute;
+  width: 100%;
   height: 100%;
-  min-height: 100%;
+  background-color: rgba(105, 102, 102, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 3;
+}
+
+.help h2 {
+  color: white;
+  font-size: 3em;
+}
+
+.nohelp {
+  display: none;
+}
+
+.about-text {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: 1em;
+  border-radius: 1em;
+}
+
+.closeHelpBtn {
+  margin: 1em;
+  font-size: 3rem;
+  background-color: red !important;
+}
+
+/* MAIN CONTAINER */
+.container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 600px;
 }
 
-.box {
-  padding: 20px;
-  display: flex;
-  /* color: white; */
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.title {
-  background-color: white;
-  color: red;
-  margin-top: 1rem;
-  border-radius: 1rem;
-  flex: 1;
-  font-size: 3em;
+.container .helpBtn {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  top: 0;
+  right: 0;
+  font-size: 1em;
   font-weight: bold;
-  font-family: 'Langar', cursive;
-  letter-spacing: .5em;
-  padding-right: 0;
-  justify-content: center;
-  align-items: center;
+  margin: 0.25em 0;
+  border-radius: 50%;
+  padding-bottom: 0.3em;
+  background-color: blue;
+  border: 2px rgb(3, 3, 48) solid;
+  text-align: center;
 }
 
-.timer-score {
-  width: 100%;
-  flex: 1;
+h1 {
+  text-transform: uppercase;
+  font-size: 3rem;
+  letter-spacing: 0.5rem;
+  margin: 0.25em;
+}
+
+/* Score Timer StopBtn */
+
+.scoreTimer {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
+  font-size: 2rem;
   align-items: center;
-  font-family: 'Noto Sans';
+  justify-content: space-between;
+  width: 100%;
+}
+
+.score,
+.timer {
+  margin: 0 0.5em;
+}
+
+.score {
   font-size: 2rem;
 }
 
-.letterbox {
-  /* background-color: green; */
-  font-size: 4em;
-  flex: 1;
-  font-family: 'Langar';
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-}
-
-.answerbox {
-  /* background-color: blue; */
-  flex: 1;
-  font-family: 'Noto Sans', sans-serif;
-  align-items: center;
-  font-size: 3em;
-  justify-content: center;
-  height: 20%;
-}
-
-.words {
-  /* background-color: yellow; */
-  flex: 3;
-  flex-flow: row wrap;
-  font-family: 'Noto Sans', sans-serif;
-  font-size: .9em;
-  justify-content: center;
-  align-items: unset;
-  /* align-items: center; */
-}
-
-.word {
-  /* display: flex; */
-  margin: 0 1rem;
-  font-family: 'Noto Sans', sans-serif;
-  /* color: white; */
-}
-
-.letter {
-  margin: 0 0.2rem;
-}
-
-.nodisplay {
-  display: none !important;
-}
-
-.play {
-  display: flex;
-  flex: 6;
-  flex-flow: column nowrap;
-  width: 100%;
-}
-
-.pause {
-  display: flex;
-  flex: 6;
-  flex-direction: column;
-  justify-content: space-around;
+.timer {
+  font-family: monospace;
 }
 
 .btn {
-  background-color: white;
-  color: orangered;
-  font-family: 'Langar';
+  color: white;
+  background-color: orangered;
+  padding: 0.25em;
+  border: 2px red solid;
+  border-radius: 0.5em;
+  cursor: pointer;
+
+  /* If you want to implement it in very old browser-versions */
+  -webkit-user-select: none;
+  /* Chrome/Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+ */
+
+  /* The rule below is not implemented in browsers yet */
+  -o-user-select: none;
+
+  /* The rule below is implemented in most browsers by now */
+  user-select: none;
+}
+
+.hint-box {
+  width: 100%;
+  border: 2px solid rgba(128, 128, 128, 0.733);
+  margin: 0.5em;
+  border-radius: 0.5em;
+  padding: 0.25em;
+  color: rgba(128, 128, 128, 0.733);
+  font-size: 0.75rem;
+}
+
+.guide-box {
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.5em;
+}
+
+.box {
+  min-height: 6rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: black;
+}
+
+.letter,
+.comma {
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  margin: 0 0.25em;
+  padding: 0.25em;
+
+  font-weight: 700;
   cursor: pointer;
 }
 
-.start-btn {
-  font-size: 4rem;
-  align-self: center;
-  padding: 2rem;
-  border-radius: 2rem;
+.letter {
+  border: 2px red solid;
+  border-radius: 0.25em;
 }
 
-.end-btn {
-  padding: 1rem;
-  border-radius: 1rem;
+.empty {
+  border: 0px transparent solid;
+  width: 5em;
 }
 
-.final {
+.answerBox .letter {
+  border: 2px blue solid;
+  font-weight: 400;
+}
+
+.answerHint {
+  position: relative;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.foundWord {
+  position: absolute;
+  z-index: 2;
+  text-transform: uppercase;
+  font-size: 3.5rem;
+  color: blue;
+  letter-spacing: 0.5rem;
+  transition: top var(--wordTimeout) var(--wordAnimateCurve),
+    left var(--wordTimeout) var(--wordAnimateCurve),
+    font-size var(--wordTimeout) var(--wordAnimateCurve),
+    letter-spacing var(--wordTimeout) var(--wordAnimateCurve),
+    opacity var(--wordTimeout) var(--wordAnimateCurve);
+}
+
+.word {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 200;
+}
+
+.word.reveal {
+  font-weight: bold;
+}
+
+.wordBox {
+  width: 100%;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  border: 2px green solid;
+  padding: 0.5em;
+  border-radius: 0.5em;
+}
+
+.solution {
+  font-size: 3rem;
+  color: blue;
 }
